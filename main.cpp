@@ -116,7 +116,7 @@ int main(int argc,char **argv)
         }
         char key=0;
         int index=0;
-            //capture until press ESC or until the end of the video
+        //capture until press ESC or until the end of the video
         while ( key!=27 && TheVideoCapturer.grab())
         {
             TheVideoCapturer.retrieve( TheInputImage);
@@ -138,11 +138,6 @@ int main(int argc,char **argv)
                     TheMarkers[i].draw(TheInputImageCopy,Scalar(0,0,255),1);
                 }
 
-                //print other rectangles that contains no valid markers
-                /**     for (unsigned int i=0;i<MDetector.getCandidates().size();i++) {
-                    aruco::Marker m( MDetector.getCandidates()[i],999);
-                    m.draw(TheInputImageCopy,cv::Scalar(255,0,0));
-                }*/
                 //draw a 3d cube in each marker if there is 3d info
                 if (  TheCameraParameters.isValid()) {
                     for (unsigned int i=0;i<TheMarkers.size();i++) {
@@ -157,18 +152,10 @@ int main(int argc,char **argv)
                 double pos[3];
                 double rot[4];
 
-                //TheMarkers[i].OgreGetPoseParameters((double *)pos, (double *)rot);
-
                 cout << TheMarkers[i].Rvec.at<float>(0,0)/3.1415*180 << " " << TheMarkers[i].Rvec.at<float>(1,0)/3.1415*180 << " " << TheMarkers[i].Rvec.at<float>(2,0)/3.1415*180 << " " << endl;// << "     " << TheMarkers[i].Tvec << endl;
                 //Aligns with the xyz cross hatch.
                 //x,y origin are center of screen
                 //z is
-
-
-                //cv::Mat cross  = TheMarkers[i].Rvec.cross(TheMarkers[i].Tvec);
-                // cv::Mat dst;
-                // cv::normalize(cross, dst);
-                // cout << dst << endl;
 
                 //cout << TheMarkers[i].getPerimeter() << endl;
             }
@@ -189,12 +176,7 @@ int main(int argc,char **argv)
     }
 
 }
-/************************************
- *
- *
- *
- *
- ************************************/
+
 
 void cvTackBarEvents(int pos,void*)
 {
@@ -204,17 +186,12 @@ void cvTackBarEvents(int pos,void*)
     ThresParam1=iThresParam1;
     ThresParam2=iThresParam2;
     MDetector.setThresholdParams(ThresParam1,ThresParam2);
-//recompute
+    //recompute
     MDetector.detect(TheInputImage,TheMarkers,TheCameraParameters);
     TheInputImage.copyTo(TheInputImageCopy);
     for (unsigned int i=0;i<TheMarkers.size();i++)	TheMarkers[i].draw(TheInputImageCopy,Scalar(0,0,255),1);
-    //print other rectangles that contains no valid markers
-    /*for (unsigned int i=0;i<MDetector.getCandidates().size();i++) {
-        aruco::Marker m( MDetector.getCandidates()[i],999);
-        m.draw(TheInputImageCopy,cv::Scalar(255,0,0));
-    }*/
 
-//draw a 3d cube in each marker if there is 3d info
+    //draw a 3d cube in each marker if there is 3d info
     if (TheCameraParameters.isValid())
         for (unsigned int i=0;i<TheMarkers.size();i++)
             CvDrawingUtils::draw3dCube(TheInputImageCopy,TheMarkers[i],TheCameraParameters);
