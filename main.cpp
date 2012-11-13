@@ -30,6 +30,8 @@ or implied, of Rafael Muñoz Salinas.
 #include <sstream>
 #include <aruco/aruco.h>
 #include <aruco/cvdrawingutils.h>
+
+#include "Controller.hpp"
 using namespace cv;
 using namespace aruco;
 
@@ -43,6 +45,7 @@ VideoCapture TheVideoCapturer;
 vector<Marker> TheMarkers;
 Mat TheInputImage,TheInputImageCopy;
 CameraParameters TheCameraParameters;
+Controller *controller;
 void cvTackBarEvents(int pos,void*);
 bool readCameraParameters(string TheIntrinsicFile,CameraParameters &CP,Size size);
 
@@ -73,6 +76,7 @@ bool readArguments ( int argc,char **argv )
 
 int main(int argc,char **argv)
 {
+    controller = new Controller();
     try
     {
         if (readArguments (argc,argv)==false) {
@@ -80,10 +84,15 @@ int main(int argc,char **argv)
         }
 
         if (TheInputVideo=="live") {
-            TheVideoCapturer.open(0);
+            TheVideoCapturer.open(1);
             waitTime=10;
         }
         else  TheVideoCapturer.open(TheInputVideo);
+        TheVideoCapturer.set(CV_CAP_PROP_FRAME_WIDTH, 160);
+        TheVideoCapturer.set(CV_CAP_PROP_FRAME_HEIGHT, 120);
+        TheVideoCapturer.set(CV_CAP_PROP_FPS, 5);
+        
+
         //check video is open
         if (!TheVideoCapturer.isOpened()) {
             cerr<<"Could not open video"<<endl;
@@ -141,8 +150,8 @@ int main(int argc,char **argv)
                 //draw a 3d cube in each marker if there is 3d info
                 if (  TheCameraParameters.isValid()) {
                     for (unsigned int i=0;i<TheMarkers.size();i++) {
-                        //CvDrawingUtils::draw3dCube(TheInputImageCopy,TheMarkers[i],TheCameraParameters);
-                        //CvDrawingUtils::draw3dAxis(TheInputImageCopy,TheMarkers[i],TheCameraParameters);
+                        CvDrawingUtils::draw3dCube(TheInputImageCopy,TheMarkers[i],TheCameraParameters);
+                        CvDrawingUtils::draw3dAxis(TheInputImageCopy,TheMarkers[i],TheCameraParameters);
                     }
                 }
             }
@@ -153,6 +162,7 @@ int main(int argc,char **argv)
                 double rot[4];
 
                 cout << TheMarkers[i].Rvec.at<float>(0,0)/3.1415*180 << " " << TheMarkers[i].Rvec.at<float>(1,0)/3.1415*180 << " " << TheMarkers[i].Rvec.at<float>(2,0)/3.1415*180 << " " << endl;// << "     " << TheMarkers[i].Tvec << endl;
+                controller->controlMarker(TheMarkers[i]);
                 //Aligns with the xyz cross hatch.
                 //x,y origin are center of screen
                 //z is
