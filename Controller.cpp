@@ -2,8 +2,9 @@
 
 Controller::Controller() 
 {
-	turnProportionalGain = -1.0f; //converts offset from camera to turn duty cycle
+	turnProportionalGain = 1.0f; //converts offset from camera to turn duty cycle
 	elivationProportionalGain = -1.0f; // converts offset in the y direction to elivation
+	sideProportionalGain = 1.0f;
 
 	lowerAltitudeDutyCycle = 0.2f; //Worst case senario, slowly lower copter to the floor.
 }
@@ -16,15 +17,15 @@ Controller::~Controller()
 void Controller::controlMarker(aruco::Marker &marker)
 {
 	//marker.Rxyz
-
-	//if (isPerpendicular(marker)) {
-	//	cout << "Is isPerpendicular Ya!!" << endl;
-	//}
+	if (isPerpendicular(marker)) {
+		cout << "Is isPerpendicular Ya!!" << endl;
+	}
 	cv::Mat deltas = getDelta(marker);
 	cout <<deltas << endl;
 
 	//If rotate the camera to make the tag in the center of the view
 	turn(marker.Tvec.at<float>(0,0)*turnProportionalGain);
+	side(getDelta(marker).at<float>(0,0)*sideProportionalGain);
 	//Adjust the height to ensure that the tag is in the center.
 	elivation(marker.Tvec.at<float>(1,0)*elivationProportionalGain);
 }

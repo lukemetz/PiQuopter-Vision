@@ -88,8 +88,8 @@ int main(int argc,char **argv)
             waitTime=10;
         }
         else  TheVideoCapturer.open(TheInputVideo);
-        TheVideoCapturer.set(CV_CAP_PROP_FRAME_WIDTH, 320);
-        TheVideoCapturer.set(CV_CAP_PROP_FRAME_HEIGHT, 240);
+        //TheVideoCapturer.set(CV_CAP_PROP_FRAME_WIDTH, 320);
+        //TheVideoCapturer.set(CV_CAP_PROP_FRAME_HEIGHT, 240);
         //TheVideoCapturer.set(CV_CAP_PROP_FPS, 5);
         
 
@@ -161,7 +161,7 @@ int main(int argc,char **argv)
                 double pos[3];
                 double rot[4];
 
-                cout << TheMarkers[i].Rvec.at<float>(0,0)/3.1415*180 << " " << TheMarkers[i].Rvec.at<float>(1,0)/3.1415*180 << " " << TheMarkers[i].Rvec.at<float>(2,0)/3.1415*180 << " " << endl;// << "     " << TheMarkers[i].Tvec << endl;
+                //cout << TheMarkers[i].Rvec.at<float>(0,0)/3.1415*180 << " " << TheMarkers[i].Rvec.at<float>(1,0)/3.1415*180 << " " << TheMarkers[i].Rvec.at<float>(2,0)/3.1415*180 << " " << endl;// << "     " << TheMarkers[i].Tvec << endl;
                 controller->controlMarker(TheMarkers[i]);
                 //Aligns with the xyz cross hatch.
                 //x,y origin are center of screen

@@ -10,6 +10,7 @@ public:
 	//Control constants
 	float turnProportionalGain;
 	float elivationProportionalGain;
+	float sideProportionalGain;
 
 	//Other constants
 	float lowerAltitudeDutyCycle;
