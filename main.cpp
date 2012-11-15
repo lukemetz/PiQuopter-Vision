@@ -88,8 +88,11 @@ int main(int argc,char **argv)
             waitTime=10;
         }
         else  TheVideoCapturer.open(TheInputVideo);
-        //TheVideoCapturer.set(CV_CAP_PROP_FRAME_WIDTH, 320);
-        //TheVideoCapturer.set(CV_CAP_PROP_FRAME_HEIGHT, 240);
+        if (!gui) {
+            TheVideoCapturer.set(CV_CAP_PROP_FRAME_WIDTH, 320);
+            TheVideoCapturer.set(CV_CAP_PROP_FRAME_HEIGHT, 240);
+        }
+
         //TheVideoCapturer.set(CV_CAP_PROP_FPS, 5);
         
 
