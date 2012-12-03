@@ -15,7 +15,6 @@ public:
 	//Other constants
 	float lowerAltitudeDutyCycle;
 
-
 	Controller();
 	~Controller();
 	void controlMarker(aruco::Marker &marker);

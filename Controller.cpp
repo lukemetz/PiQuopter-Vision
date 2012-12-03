@@ -5,7 +5,6 @@ Controller::Controller()
 	turnProportionalGain = 1.0f; //converts offset from camera to turn duty cycle
 	elivationProportionalGain = -1.0f; // converts offset in the y direction to elivation
 	sideProportionalGain = 1.0f;
-
 	lowerAltitudeDutyCycle = 0.2f; //Worst case senario, slowly lower copter to the floor.
 }
 

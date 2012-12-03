@@ -84,7 +84,7 @@ int main(int argc,char **argv)
         }
 
         if (TheInputVideo=="live") {
-            TheVideoCapturer.open(1);
+            TheVideoCapturer.open(0);
             waitTime=10;
         }
         else  TheVideoCapturer.open(TheInputVideo);
@@ -94,7 +94,6 @@ int main(int argc,char **argv)
         }
 
         //TheVideoCapturer.set(CV_CAP_PROP_FPS, 5);
-        
 
         //check video is open
         if (!TheVideoCapturer.isOpened()) {
