@@ -72,6 +72,9 @@ void chat_session::deliver(const chat_message& msg)
 {
   bool write_in_progress = !write_msgs_.empty();
   write_msgs_.push_back(msg);
+  write_msgs_.push_back()
+
+
   if (!write_in_progress)
   {
     boost::asio::async_write(socket_,
@@ -164,7 +167,7 @@ void chat_server::handle_accept(chat_session_ptr session,
 }
 
 //----------------------------------------------------------------------
-
+/*
 int main(int argc, char* argv[])
 {
   try
@@ -194,4 +197,4 @@ int main(int argc, char* argv[])
   }
 
   return 0;
-}
+} */

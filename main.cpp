@@ -31,7 +31,24 @@ or implied, of Rafael Muñoz Salinas.
 #include <aruco/aruco.h>
 #include <aruco/cvdrawingutils.h>
 
+
+//for server
+#include <algorithm>
+#include <cstdlib>
+#include <deque>
+#include <iostream>
+#include <list>
+#include <set>
+#include <boost/bind.hpp>
+#include <boost/shared_ptr.hpp>
+#include <boost/enable_shared_from_this.hpp>
+#include <boost/asio.hpp>
+
+
 #include "Controller.hpp"
+#include "server.hpp"
+
+
 using namespace cv;
 using namespace aruco;
 
@@ -77,6 +94,16 @@ bool readArguments ( int argc,char **argv )
 int main(int argc,char **argv)
 {
     controller = new Controller();
+    boost::asio::io_service io_service;
+
+    chat_server_list servers;
+    //for (int i = 1; i < argc; ++i) {
+      using namespace std; // For atoi.
+      tcp::endpoint endpoint(tcp::v4(), 31415);
+      chat_server_ptr server(new chat_server(io_service, endpoint));
+      servers.push_back(server);
+    //}
+
     try
     {
         if (readArguments (argc,argv)==false) {
@@ -130,6 +157,7 @@ int main(int argc,char **argv)
         //capture until press ESC or until the end of the video
         while ( key!=27 && TheVideoCapturer.grab())
         {
+            io_service.poll();
             TheVideoCapturer.retrieve( TheInputImage);
             //copy image
 
