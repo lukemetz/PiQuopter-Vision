@@ -1,5 +1,8 @@
 #include "Controller.hpp"
 
+#include <iostream>
+#include <fstream>
+
 Controller::Controller() 
 {
 	turnProportionalGain = 1.0f; //converts offset from camera to turn duty cycle
@@ -48,6 +51,7 @@ bool Controller::isPerpendicular(aruco::Marker &marker)
 		float x = marker.Rvec.at<float>(0,0)/PI*180;
 	float y = marker.Rvec.at<float>(1,0)/PI*180;
 	float z = marker.Rvec.at<float>(2,0)/PI*180;
+
 	//TODO move configuration to separate script to do on the fly.
 	if (abs(x) < 20) {
 		cout << "Stable x" << endl;
@@ -69,19 +73,59 @@ bool Controller::isPerpendicular(aruco::Marker &marker)
 	return ret;
 }
 
-void Controller::turn(float dutycycle) 
+void Controller::command(char *command)
+{
+	//order Rudder elevation aileron throttle
+	int val = atoi(&command[2]);
+	printf("val found %d \n", val);
+	switch (command[1]) {
+		case '0':
+			turn(val/100.0);
+			break;
+		case '1':
+			elivation(val/100.0);
+			break;
+
+		case '2':
+			forward(val/100.0);
+			break;
+
+		case '3':
+			side(val/100.0);
+			break;
+		default:
+			break;
+	}
+}
+
+void Controller::writeToServoblaster(int servo, float dutycycle)
+{
+	ofstream servoblaster;
+	servoblaster.open ("/dev/servoblaster");
+	servoblaster << servo << "=" << static_cast<int>(dutycycle * 100);
+	servoblaster.close();
+}
+
+void Controller::turn(float dutycycle)
 {
 	cout << "turn" << dutycycle << endl;
+	writeToServoblaster(0, dutycycle);
 }
-void Controller::elivation(float dutycycle) 
+
+void Controller::elivation(float dutycycle)
 {
-	cout << "elivation" << dutycycle << endl;
+	cout << "elevation" << dutycycle << endl;
+	writeToServoblaster(1, dutycycle);
 }
-void Controller::forward(float dutycycle) 
+
+void Controller::forward(float dutycycle)
 {
 	cout << "forward" << dutycycle << endl;
+	writeToServoblaster(2, dutycycle);
 }
-void Controller::side(float dutycycle) 
+
+void Controller::side(float dutycycle)
 {
 	cout << "side" << dutycycle << endl;
+	writeToServoblaster(3, dutycycle);
 }

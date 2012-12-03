@@ -24,9 +24,11 @@ public:
 	void elivation(float dutycycle);
 	void forward(float dutycycle);
 	void side(float dutycycle);
-
+	void command(char *command);
 	bool isPerpendicular(aruco::Marker &marker);
 	cv::Mat getDelta(aruco::Marker &marker);
+
+	void writeToServoblaster(int servo, float dutycycle);
 private:
 
 };

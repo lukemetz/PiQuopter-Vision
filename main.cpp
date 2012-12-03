@@ -90,19 +90,14 @@ bool readArguments ( int argc,char **argv )
     return true;
 }
 
-
 int main(int argc,char **argv)
 {
     controller = new Controller();
+
     boost::asio::io_service io_service;
 
-    chat_server_list servers;
-    //for (int i = 1; i < argc; ++i) {
-      using namespace std; // For atoi.
-      tcp::endpoint endpoint(tcp::v4(), 31415);
-      chat_server_ptr server(new chat_server(io_service, endpoint));
-      servers.push_back(server);
-    //}
+    using namespace std; // For atoi.
+    server s(io_service, 8080, controller);
 
     try
     {
