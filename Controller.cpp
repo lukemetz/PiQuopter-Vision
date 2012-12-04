@@ -3,6 +3,9 @@
 #include <iostream>
 #include <fstream>
 
+#include <sstream>
+
+
 Controller::Controller() 
 {
 	turnProportionalGain = 1.0f; //converts offset from camera to turn duty cycle
@@ -100,10 +103,22 @@ void Controller::command(char *command)
 
 void Controller::writeToServoblaster(int servo, float dutycycle)
 {
-	ofstream servoblaster;
-	servoblaster.open ("/dev/servoblaster");
-	servoblaster << servo << "=" << static_cast<int>(dutycycle * 100);
-	servoblaster.close();
+	//ofstream servoblaster;
+	//servoblaster.open ("/dev/servoblaster");
+	//servoblaster << servo << "=" << static_cast<int>(dutycycle * 100);
+	//servoblaster << "0=120";
+	//servoblaster.close();
+	std::string str;
+	std::stringstream out;
+	out << "echo ";
+	out << servo;
+	out << "=";
+	out << static_cast<int>(dutycycle *100);
+	out << " > /dev/servoblaster";
+
+	printf("%s\n",out.str().c_str() );
+	system(out.str().c_str());
+
 }
 
 void Controller::turn(float dutycycle)
