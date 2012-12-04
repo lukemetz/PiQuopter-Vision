@@ -43,10 +43,14 @@ or implied, of Rafael Muñoz Salinas.
 #include <boost/shared_ptr.hpp>
 #include <boost/enable_shared_from_this.hpp>
 #include <boost/asio.hpp>
-
+#include <boost/thread.hpp>
+#include <boost/bind.hpp>
+#include <boost/smart_ptr.hpp>
+#include <boost/asio.hpp>
+#include <boost/thread.hpp>
 
 #include "Controller.hpp"
-#include "server.hpp"
+//#include "server.hpp"
 
 
 using namespace cv;
@@ -90,17 +94,65 @@ bool readArguments ( int argc,char **argv )
     return true;
 }
 
+using boost::asio::ip::tcp;
+const int max_length = 1024;
+typedef boost::shared_ptr<tcp::socket> socket_ptr;
+
+void session(socket_ptr sock, Controller *controller) {
+    try {
+        //listen for incoming data
+        for (;;) {
+          char data[max_length];
+          printf("got data %s\n", data );
+
+          //Parse the command type
+          if (data[0] == 'C') {
+            printf("command found %s", &data[1]);
+            controller->command(data);
+        }
+
+          //Read some data
+        boost::system::error_code error;
+        size_t length = sock->read_some(boost::asio::buffer(data), error);
+        if (error == boost::asio::error::eof) {
+                printf("Connection closed \n");
+                controller->sock.reset();
+                break; // Connection closed cleanly by peer.
+            }
+            else if (error)
+            throw boost::system::system_error(error); // Some other error.
+        //Two ways so send back data
+        //boost::asio::write(*sock, boost::asio::buffer(data, length));
+        //sock->send(boost::asio::buffer("data back \n", 10));
+        }
+    } catch (std::exception& e) {
+        std::cerr << "Exception in thread: " << e.what() << "\n";
+    }
+}
+
+//The main tcp server function.
+void server_loop(Controller *controller)
+{
+    boost::asio::io_service io_service;
+    tcp::acceptor a(io_service, tcp::endpoint(tcp::v4(), 8080));
+    //Keep connections open and then shove a socket in when a connection has been found.
+    for (;;) {
+        socket_ptr sock(new tcp::socket(io_service));
+        a.accept(*sock);
+        controller->sock = sock;
+        //Launch the session function
+        boost::thread t(boost::bind(session, sock, controller));
+    }
+}
+
 int main(int argc,char **argv)
 {
     controller = new Controller();
 
-    boost::asio::io_service io_service;
+    //Start up a new thread to run the server
+    boost::thread server_thread(boost::bind(server_loop, controller));
 
-    using namespace std; // For atoi.
-    server s(io_service, 8080, controller);
-
-    try
-    {
+    try {
         if (readArguments (argc,argv)==false) {
             return 0;
         }
@@ -135,7 +187,6 @@ int main(int argc,char **argv)
         if (ThePyrDownLevel>0)
             MDetector.pyrDown(ThePyrDownLevel);
 
-
         //Create gui
         if (gui) {
             cv::namedWindow("thres",1);
@@ -149,10 +200,14 @@ int main(int argc,char **argv)
         }
         char key=0;
         int index=0;
+
         //capture until press ESC or until the end of the video
         while ( key!=27 && TheVideoCapturer.grab())
         {
-            io_service.poll();
+            if (controller->sock) {
+                //controller->sock->send(boost::asio::buffer("Write in this loop", 7));
+            }
+
             TheVideoCapturer.retrieve( TheInputImage);
             //copy image
 
@@ -204,9 +259,7 @@ int main(int argc,char **argv)
             key=cv::waitKey(waitTime);//wait for key to be pressed
         }
 
-    } catch (std::exception &ex)
-
-    {
+    } catch (std::exception &ex) {
         cout<<"Exception :"<<ex.what()<<endl;
     }
 
