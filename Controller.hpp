@@ -19,7 +19,7 @@ class Controller
 public:
 	//Control constants
 	float turnProportionalGain;
-	float elivationProportionalGain;
+	float throttleProportionalGain;
 	float sideProportionalGain;
 
 	//Other constants
@@ -27,11 +27,12 @@ public:
 
 	Controller();
 	~Controller();
+  void markerBasicMovement(int markerId);
 	void controlMarker(aruco::Marker &marker);
 
 	//output functions
 	void turn(float dutycycle);
-	void elivation(float dutycycle);
+	void throttle(float dutycycle);
 	void forward(float dutycycle);
 	void side(float dutycycle);
 	void command(char *command);

@@ -110,7 +110,7 @@ void session(socket_ptr sock, Controller *controller) {
             printf("command found %s", &data[1]);
             controller->command(data);
           }
-          else if (data[0]=='S'&&data[1]=='T'&&data[2]=='O'&&data[3]=='P'){
+          else if (data[0]=='s' || data[0]=='S'){
             printf("Stop command found");
             controller->command("C1000");//set throttle to 0
           }
@@ -245,7 +245,8 @@ int main(int argc,char **argv)
             TheInputImage.copyTo(TheInputImageCopy);
             if (gui) {
                 for (unsigned int i=0;i<TheMarkers.size();i++) {
-                    //cout<<TheMarkers[i]<<endl;
+                    //cout<<"The Markers"<<endl;
+                    //cout<<TheMarkers[i].id<<endl;
                     TheMarkers[i].draw(TheInputImageCopy,Scalar(0,0,255),1);
                 }
 
@@ -263,8 +264,14 @@ int main(int argc,char **argv)
                 double pos[3];
                 double rot[4];
 
+
+                controller->markerBasicMovement(TheMarkers[i].id);
+
                 //cout << TheMarkers[i].Rvec.at<float>(0,0)/3.1415*180 << " " << TheMarkers[i].Rvec.at<float>(1,0)/3.1415*180 << " " << TheMarkers[i].Rvec.at<float>(2,0)/3.1415*180 << " " << endl;// << "     " << TheMarkers[i].Tvec << endl;
-                controller->controlMarker(TheMarkers[i]);
+
+                ////align quadcopter with qr code
+                //controller->controlMarker(TheMarkers[i]);
+
                 //Aligns with the xyz cross hatch.
                 //x,y origin are center of screen
                 //z is
