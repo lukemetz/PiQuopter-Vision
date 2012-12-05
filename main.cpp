@@ -110,7 +110,7 @@ void session(socket_ptr sock, Controller *controller) {
             printf("command found %s", &data[1]);
             controller->command(data);
           }
-          else if (data[0]=='S'&&data[1]=='T'&&data[2]=='O'&&data[3]=='P'){
+          else if (data[0]=='s' || data[0]=='S')
             printf("Stop command found");
             controller->command("C1000");//set throttle to 0
           }

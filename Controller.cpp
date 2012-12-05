@@ -6,12 +6,18 @@
 #include <sstream>
 
 
-Controller::Controller() 
+Controller::Controller()
 {
 	turnProportionalGain = 1.0f; //converts offset from camera to turn duty cycle
-	elivationProportionalGain = -1.0f; // converts offset in the y direction to elivation
+	throttleProportionalGain = -1.0f; // converts offset in the y direction to throttle
 	sideProportionalGain = 1.0f;
 	lowerAltitudeDutyCycle = 0.2f; //Worst case senario, slowly lower copter to the floor.
+
+  //initialize all controls to neutral
+	turn(1.5);
+  side(1.5);
+  forward(1.5);
+  throttle(1);
 }
 
 Controller::~Controller()
@@ -32,7 +38,7 @@ void Controller::controlMarker(aruco::Marker &marker)
 	turn(marker.Tvec.at<float>(0,0)*turnProportionalGain);
 	side(getDelta(marker).at<float>(0,0)*sideProportionalGain);
 	//Adjust the height to ensure that the tag is in the center.
-	elivation(marker.Tvec.at<float>(1,0)*elivationProportionalGain);
+	throttle(marker.Tvec.at<float>(1,0)*throttleProportionalGain);
 }
 
 cv::Mat Controller::getDelta(aruco::Marker &marker)
@@ -79,22 +85,33 @@ bool Controller::isPerpendicular(aruco::Marker &marker)
 void Controller::command(char *command)
 {
 	//order Rudder elevation aileron throttle
+  //get 0 to 100 for throttle and -50 to 50 for everything else
 	int val = atoi(&command[2]);
+  float value;
 	printf("val found %d \n", val);
 	switch (command[1]) {
-		case '0':
-			turn(val/100.0);
+		case '0': //rudder - yaw (rotate), val -50 to 50
+      value = (val+50)/100.0+100;
+      if (value>=100 && value <=200){
+			  turn(value);
+      }
 			break;
-		case '1':
-			elivation(val/100.0);
+		case '1': //elevation - forward/backward, val -50 to 50
+      value = (val+50)/100.0+100;
+      if (value>=100 && value <=200){
+        forward((val+50)/100.0+100);
+      }
 			break;
-
-		case '2':
-			forward(val/100.0);
-			break;
-
-		case '3':
-			side(val/100.0);
+		case '2': //aileron - left/right turn, val -50 to 50
+      value = (val+50)/100.0+100;
+      if (value>=100 && value <=200){
+        side(value);
+      }
+		case '3': //throttle - up/down, val 0 to 100
+      value = val/100.0+100;
+      if (value>=100 && value <=200){
+          throttle(value);
+      }
 			break;
 		default:
 			break;
@@ -127,7 +144,7 @@ void Controller::turn(float dutycycle)
 	writeToServoblaster(0, dutycycle);
 }
 
-void Controller::elivation(float dutycycle)
+void Controller::throttle(float dutycycle)
 {
 	cout << "elevation" << dutycycle << endl;
 	writeToServoblaster(1, dutycycle);
