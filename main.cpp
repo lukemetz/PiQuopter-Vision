@@ -109,7 +109,11 @@ void session(socket_ptr sock, Controller *controller) {
           if (data[0] == 'C') {
             printf("command found %s", &data[1]);
             controller->command(data);
-        }
+          }
+          else if (data[0]=='S'&&data[1]=='T'&&data[2]=='O'&&data[3]=='P'){
+            printf("Stop command found");
+            controller->command("C1000");//set throttle to 0
+          }
 
           //Read some data
         boost::system::error_code error;
@@ -204,11 +208,29 @@ int main(int argc,char **argv)
         //capture until press ESC or until the end of the video
         while ( key!=27 && TheVideoCapturer.grab())
         {
-            if (controller->sock) {
-                //controller->sock->send(boost::asio::buffer("Write in this loop", 7));
-            }
+
 
             TheVideoCapturer.retrieve( TheInputImage);
+
+            vector<uchar> buf;
+            //prepend length of buffer to beginning
+
+
+
+            imencode(".jpg", TheInputImage, buf);
+
+            unsigned long int len = buf.size();
+            uchar * bufLen = (uchar *) &len;
+            std::vector<uchar> len_vec(bufLen, bufLen + sizeof(unsigned long));
+            buf.insert(buf.begin(), len_vec.begin(), len_vec.end());
+
+            if (controller->sock) {
+                printf("writing over socket!!!\n");
+                //controller->sock->send(boost::asio::buffer("BREAKBREAKBREAK",15));
+                controller->sock->send(boost::asio::buffer(buf));
+                //controller->sock->send(boost::asio::buffer("BREAKBREAKBREAK",15));
+            }
+
             //copy image
 
             index++; //number of images captured
