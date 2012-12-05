@@ -25,6 +25,24 @@ Controller::~Controller()
 
 }
 
+void Controller::markerBasicMovement(int markerId)
+{
+    //cout<<markerId<<endl;
+    switch(markerId){
+      case 412:
+        turn(50);
+        break;
+      case 400:
+        turn(0);
+        break;
+      case 300:
+        throttle(0);
+        break;
+      default:
+        break;
+
+    }
+}
 void Controller::controlMarker(aruco::Marker &marker)
 {
 	//marker.Rxyz
@@ -92,26 +110,43 @@ void Controller::command(char *command)
 	switch (command[1]) {
 		case '0': //rudder - yaw (rotate), val -50 to 50
       value = (val+50)/100.0+100;
-      if (value>=100 && value <=200){
-			  turn(value);
+      if(value<1){
+          value=1;
       }
+      else if(value>2){
+          value=2;
+      }
+
+      turn(value);
 			break;
 		case '1': //elevation - forward/backward, val -50 to 50
       value = (val+50)/100.0+100;
-      if (value>=100 && value <=200){
-        forward((val+50)/100.0+100);
+      if(value<1){
+          value=1;
       }
+      else if(value>2){
+          value=2;
+      }
+      forward(value);
 			break;
 		case '2': //aileron - left/right turn, val -50 to 50
       value = (val+50)/100.0+100;
-      if (value>=100 && value <=200){
-        side(value);
+      if(value<1){
+          value=1;
       }
+      else if(value>2){
+          value=2;
+      }
+      side(value);
 		case '3': //throttle - up/down, val 0 to 100
       value = val/100.0+100;
-      if (value>=100 && value <=200){
-          throttle(value);
+      if(value<1){
+          value=1;
       }
+      else if(value>2){
+          value=2;
+      }
+      throttle(value);
 			break;
 		default:
 			break;

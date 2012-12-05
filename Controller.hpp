@@ -27,6 +27,7 @@ public:
 
 	Controller();
 	~Controller();
+  void markerBasicMovement(int markerId);
 	void controlMarker(aruco::Marker &marker);
 
 	//output functions
