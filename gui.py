@@ -7,10 +7,7 @@ class GUI(object):
         self.setup()
 
     def move(self, code, value):
-        if code == 'stop':
-            self.command = 'stop'
-        elif self.active == True:
-            self.command = 'C'+str(code)+value
+        self.command = 'C'+str(code)+value
         print self.command
 
     def start(self):
@@ -31,6 +28,28 @@ class GUI(object):
         if key == 'Escape':
             code = 'stop'
             value = 0
+            self.move(0,'0')
+            self.move(1,'0')
+            self.move(2,'0')
+            self.move(3,'0')
+            self.throttle.set(0)
+            self.yaw.set(0)
+            self.pitch.set(0)
+            self.roll.set(0)
+            self.command='stop'
+            return
+
+        elif key == 'space':
+            code = 0
+            value = 0
+            self.move(0,'0')
+            self.move(1,'0')
+            self.move(2,'0')
+            self.yaw.set(0)
+            self.pitch.set(0)
+            self.roll.set(0)
+            
+            return
         elif key == 'w':
             code = 3
             value = self.throttle.get()+1
@@ -80,11 +99,12 @@ class GUI(object):
         root.bind("<Down>", self.key)
 
         root.bind("<Escape>", self.key)
+        root.bind("<space>", self.key)
 
         #wigets:
         sidebar_bg = '#228800'
 
-        title = Label(text="PiQuopter", background="#554400",  font=("Helvetica", "16"))
+        title = Label(text="PiQuopter", background="#4400FF",  font=("Helvetica", "16"))
 
         leftbar = Frame(bg = sidebar_bg, bd=0)
         start = Button(leftbar, text = 'start', command=lambda: self.start())
