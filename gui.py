@@ -7,7 +7,10 @@ class GUI(object):
         self.setup()
 
     def move(self, code, value):
-        self.command = 'C'+str(code)+value
+        if code == 'stop':
+            self.command = 'stop'
+        elif self.active == True:
+            self.command = 'C'+str(code)+value
         print self.command
 
     def start(self):
@@ -24,10 +27,43 @@ class GUI(object):
         self.command= 'stop'
 
     def key(self,event):
-        if event.keysim == 'w':
-            print 'forwards'
-        if event.keysim == 'a':
-            print 'backwards'
+        key = event.keysym
+        if key == 'Escape':
+            code = 'stop'
+            value = 0
+        elif key == 'w':
+            code = 3
+            value = self.throttle.get()+1
+            self.throttle.set(value)
+        elif key == 's':
+            code = 3
+            value = self.throttle.get()-1
+            self.throttle.set(value)
+        elif key == 'a':
+            code = 0
+            value = self.yaw.get()-1
+            self.yaw.set(value)
+        elif key == 'd':
+            code = 0
+            value = self.yaw.get()+1
+            self.yaw.set(value)
+        elif key == 'Up':
+            code = 1
+            value = self.pitch.get()+1
+            self.pitch.set(value)
+        elif key == 'Down':
+            code = 1
+            value = self.pitch.get()-1
+            self.pitch.set(value)
+        elif key == 'Left':
+            code = 2
+            value = self.roll.get()-1
+            self.roll.set(value)
+        elif key == 'Right':
+            code = 2
+            value = self.roll.get()+1
+            self.roll.set(value)
+        self.move(code,str(value))
 
     def setup(self):
         root = Tk()
@@ -52,8 +88,8 @@ class GUI(object):
 
         leftbar = Frame(bg = sidebar_bg, bd=0)
         start = Button(leftbar, text = 'start', command=lambda: self.start())
-        self.throttle = Scale(leftbar, variable=IntVar(), orient='vertical', length=200,from_=100, to=0, bg = sidebar_bg, bd=0, tickinterval=5, state='disabled', command=lambda(x): self.move(0,x))
-        self.yaw = Scale(leftbar, variable=IntVar(), orient='horizontal', length=200,from_=-50, to=50, bg = sidebar_bg, tickinterval=5, state='disabled',command=lambda(x): self.move(1,x))
+        self.throttle = Scale(leftbar, variable=IntVar(), orient='vertical', length=200,from_=100, to=0, bg = sidebar_bg, bd=0, tickinterval=5, state='disabled', command=lambda(x): self.move(3,x))
+        self.yaw = Scale(leftbar, variable=IntVar(), orient='horizontal', length=200,from_=-50, to=50, bg = sidebar_bg, tickinterval=5, state='disabled',command=lambda(x): self.move(0,x))
 
         screen = Canvas(width=320, height=240)
             # add canvasy stuff
@@ -61,8 +97,8 @@ class GUI(object):
 
         rightbar = Frame(background=sidebar_bg)
         stop = Button(rightbar, text='stop', command=lambda: self.stop())
-        self.pitch = Scale(rightbar, variable=IntVar(), orient='vertical', length=200,from_=-50, to=50, bg = sidebar_bg, tickinterval=5, state='disabled', command=lambda(x): self.move(2,x))
-        self.roll = Scale(rightbar, variable=IntVar(), orient='horizontal', length=200,from_=-50, to=50, bg = sidebar_bg, tickinterval=5, state='disabled', command=lambda(x): self.move(3,x))
+        self.pitch = Scale(rightbar, variable=IntVar(), orient='vertical', length=200,from_=50, to=-50, bg = sidebar_bg, tickinterval=5, state='disabled', command=lambda(x): self.move(1,x))
+        self.roll = Scale(rightbar, variable=IntVar(), orient='horizontal', length=200,from_=-50, to=50, bg = sidebar_bg, tickinterval=5, state='disabled', command=lambda(x): self.move(2,x))
 
         self.controls = [self.throttle, self.yaw, self.pitch, self.roll]
         #placing:
