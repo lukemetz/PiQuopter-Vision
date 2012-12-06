@@ -1,4 +1,16 @@
 from Tkinter import *
+import socket
+
+#network stuff
+textport = "8080"
+host = "piquopter.olin.edu"
+#host = "localhost"
+port = int(textport)
+addr = (host, port)
+buf = 1024
+sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+sock.connect(addr)
+
 
 class GUI(object):
     def __init__(self):
@@ -8,6 +20,7 @@ class GUI(object):
 
     def move(self, code, value):
         self.command = 'C'+str(code)+value
+        self.sendData(self.command); 
         print self.command
 
     def start(self):
@@ -138,6 +151,10 @@ class GUI(object):
 
         root.mainloop()
 
+    def sendData(self,command):
+        sock.send(command);
+        r = Reader(sock)
+        r.start()
 
 gui = GUI()
 
