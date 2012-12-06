@@ -21,27 +21,23 @@ class GUI(object):
     def stop(self):
         self.active = False
         print 'stopped'
-        self.command= 'stop'
+        self.move(0,'0')
+        self.move(1,'0')
+        self.move(2,'0')
+        self.move(3,'0')
+        self.throttle.set(0)
+        self.yaw.set(0)
+        self.pitch.set(0)
+        self.roll.set(0)
+        self.command='stop'
 
     def key(self,event):
         key = event.keysym
         if key == 'Escape':
-            code = 'stop'
-            value = 0
-            self.move(0,'0')
-            self.move(1,'0')
-            self.move(2,'0')
-            self.move(3,'0')
-            self.throttle.set(0)
-            self.yaw.set(0)
-            self.pitch.set(0)
-            self.roll.set(0)
-            self.command='stop'
+            self.stop()
             return
 
         elif key == 'space':
-            code = 0
-            value = 0
             self.move(0,'0')
             self.move(1,'0')
             self.move(2,'0')

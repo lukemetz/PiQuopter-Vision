@@ -119,7 +119,7 @@ void Controller::command(char *command)
 
       turn(value);
 			break;
-		case '1': //elevation - forward/backward, val -50 to 50
+		case '1': //elevation - (pitch) forward/backward, val -50 to 50
       value = (val+50)/100.0+100;
       if(value<1){
           value=1;
@@ -129,7 +129,7 @@ void Controller::command(char *command)
       }
       forward(value);
 			break;
-		case '2': //aileron - left/right turn, val -50 to 50
+		case '2': //aileron - (roll) left/right turn, val -50 to 50
       value = (val+50)/100.0+100;
       if(value<1){
           value=1;
