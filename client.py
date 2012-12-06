@@ -9,6 +9,11 @@ import os
 import time
 import struct
 
+
+import cStringIO
+from Tkinter import *
+from PIL import Image, ImageTk
+
 textport = "8080"
 host = "piquopter.olin.edu"
 
@@ -33,7 +38,7 @@ class Reader(threading.Thread):
 				chars = self.socket.recv(4)
 				otherfi = open(str(count)+"size.hex", 'wb+')
 				otherfi.write(chars)
-				otherfi.close()
+				#otherfi.close()
 				l = struct.unpack('<L', chars)
 				'''else:
 					chars = self.socket.recv(32)
@@ -103,3 +108,27 @@ def main():
 
 if (__name__ == "__main__"):
   main()
+
+
+
+'''from Tkinter import *
+from PIL import Image, ImageTk
+import glob
+
+
+root = Tk()
+#image = Image.open("132moo.jpeg");
+#raw_new = im.tostring()#'jpeg')
+
+raw = open("132moo.jpeg").read()
+
+#print len(raw_new)
+print raw
+image = Image
+image = Image.fromstring('P', (320, 240), raw, 'jpeg')
+photo = ImageTk.PhotoImage(image)
+label = Label(image=photo)
+label.image = photo
+label.pack()
+root.update()
+root.mainloop()'''
