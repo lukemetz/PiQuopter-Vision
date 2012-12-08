@@ -46,17 +46,21 @@ void Controller::markerBasicMovement(int markerId)
 void Controller::controlMarker(aruco::Marker &marker)
 {
 	//marker.Rxyz
-	if (isPerpendicular(marker)) {
-		cout << "Is isPerpendicular Ya!!" << endl;
-	}
-	cv::Mat deltas = getDelta(marker);
-	cout <<deltas << endl;
+	//if (isPerpendicular(marker)) {
+	//	cout << "Is isPerpendicular Ya!!" << endl;
+	//}
+	//cv::Mat deltas = getDelta(marker);
+	//cout <<deltas << endl;
 
 	//If rotate the camera to make the tag in the center of the view
-	turn(marker.Tvec.at<float>(0,0)*turnProportionalGain);
-	side(getDelta(marker).at<float>(0,0)*sideProportionalGain);
+	//turn(marker.Tvec.at<float>(0,0)*turnProportionalGain);
+	//side(getDelta(marker).at<float>(0,0)*sideProportionalGain);
 	//Adjust the height to ensure that the tag is in the center.
-	throttle(marker.Tvec.at<float>(1,0)*throttleProportionalGain);
+	if (marker.id == 250) {
+		cv::Mat mat = getDelta(marker);
+		//printf("%f %f %f", , mat.at<float>(1,0), mat.at<float>(2,0));
+		throttle((mat.at<float>(0,0)*-1+100)/100.0f);
+	}
 }
 
 cv::Mat Controller::getDelta(aruco::Marker &marker)
@@ -182,7 +186,7 @@ void Controller::turn(float dutycycle)
 void Controller::throttle(float dutycycle)
 {
 	cout << "elevation" << dutycycle << endl;
-	writeToServoblaster(1, dutycycle);
+	writeToServoblaster(3, dutycycle);
 }
 
 void Controller::forward(float dutycycle)
@@ -194,5 +198,5 @@ void Controller::forward(float dutycycle)
 void Controller::side(float dutycycle)
 {
 	cout << "side" << dutycycle << endl;
-	writeToServoblaster(3, dutycycle);
+	writeToServoblaster(1, dutycycle);
 }

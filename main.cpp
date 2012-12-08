@@ -270,7 +270,7 @@ int main(int argc,char **argv)
                 //cout << TheMarkers[i].Rvec.at<float>(0,0)/3.1415*180 << " " << TheMarkers[i].Rvec.at<float>(1,0)/3.1415*180 << " " << TheMarkers[i].Rvec.at<float>(2,0)/3.1415*180 << " " << endl;// << "     " << TheMarkers[i].Tvec << endl;
 
                 ////align quadcopter with qr code
-                //controller->controlMarker(TheMarkers[i]);
+                controller->controlMarker(TheMarkers[i]);
 
                 //Aligns with the xyz cross hatch.
                 //x,y origin are center of screen
