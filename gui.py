@@ -2,6 +2,18 @@ from Tkinter import *
 from PIL import Image, ImageTk
 from Reader import *
 import imghdr
+import socket
+
+#network stuff
+textport = "8080"
+host = "piquopter.olin.edu"
+#host = "localhost"
+port = int(textport)
+addr = (host, port)
+buf = 1024
+sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+sock.connect(addr)
+
 
 class GUI(object):
     def __init__(self):
@@ -11,6 +23,7 @@ class GUI(object):
 
     def move(self, code, value):
         self.command = 'C'+str(code)+value
+        self.sendData(self.command); 
         print self.command
 
     def start(self):
@@ -27,10 +40,65 @@ class GUI(object):
         self.command= 'stop'
 
     def key(self,event):
-        if event.keysim == 'w':
-            print 'forwards'
-        if event.keysim == 'a':
-            print 'backwards'
+        key = event.keysym
+        if key == 'Escape':
+            code = 'stop'
+            value = 0
+            self.move(0,'0')
+            self.move(1,'0')
+            self.move(2,'0')
+            self.move(3,'0')
+            self.throttle.set(0)
+            self.yaw.set(0)
+            self.pitch.set(0)
+            self.roll.set(0)
+            self.command='stop'
+            return
+
+        elif key == 'space':
+            code = 0
+            value = 0
+            self.move(0,'0')
+            self.move(1,'0')
+            self.move(2,'0')
+            self.yaw.set(0)
+            self.pitch.set(0)
+            self.roll.set(0)
+            
+            return
+        elif key == 'w':
+            code = 3
+            value = self.throttle.get()+1
+            self.throttle.set(value)
+        elif key == 's':
+            code = 3
+            value = self.throttle.get()-1
+            self.throttle.set(value)
+        elif key == 'a':
+            code = 0
+            value = self.yaw.get()-1
+            self.yaw.set(value)
+        elif key == 'd':
+            code = 0
+            value = self.yaw.get()+1
+            self.yaw.set(value)
+        elif key == 'Up':
+            code = 1
+            value = self.pitch.get()+1
+            self.pitch.set(value)
+        elif key == 'Down':
+            code = 1
+            value = self.pitch.get()-1
+            self.pitch.set(value)
+        elif key == 'Left':
+            code = 2
+            value = self.roll.get()-1
+            self.roll.set(value)
+        elif key == 'Right':
+            code = 2
+            value = self.roll.get()+1
+            self.roll.set(value)
+        self.move(code,str(value))
 
     def update(self):
         print "good"
@@ -63,18 +131,18 @@ class GUI(object):
         self.root.bind("<Left>", self.key)
         self.root.bind("<Right>", self.key)
         self.root.bind("<Down>", self.key)
-
         self.root.bind("<Escape>", self.key)
+        self.root.bind("<space>", self.key)
 
         #wigets:
         sidebar_bg = '#228800'
 
-        title = Label(text="PiQuopter", background="#554400",  font=("Helvetica", "16"))
+        title = Label(text="PiQuopter", background="#4400FF",  font=("Helvetica", "16"))
 
         leftbar = Frame(bg = sidebar_bg, bd=0)
         start = Button(leftbar, text = 'start', command=lambda: self.start())
-        self.throttle = Scale(leftbar, variable=IntVar(), orient='vertical', length=200,from_=100, to=0, bg = sidebar_bg, bd=0, tickinterval=5, state='disabled', command=lambda(x): self.move(0,x))
-        self.yaw = Scale(leftbar, variable=IntVar(), orient='horizontal', length=200,from_=-50, to=50, bg = sidebar_bg, tickinterval=5, state='disabled',command=lambda(x): self.move(1,x))
+        self.throttle = Scale(leftbar, variable=IntVar(), orient='vertical', length=200,from_=100, to=0, bg = sidebar_bg, bd=0, tickinterval=5, state='disabled', command=lambda(x): self.move(3,x))
+        self.yaw = Scale(leftbar, variable=IntVar(), orient='horizontal', length=200,from_=-50, to=50, bg = sidebar_bg, tickinterval=5, state='disabled',command=lambda(x): self.move(0,x))
 
         self.screen = Canvas(width=320, height=240)
             # add canvasy stuff
@@ -88,8 +156,8 @@ class GUI(object):
         '''
         rightbar = Frame(background=sidebar_bg)
         stop = Button(rightbar, text='stop', command=lambda: self.stop())
-        self.pitch = Scale(rightbar, variable=IntVar(), orient='vertical', length=200,from_=-50, to=50, bg = sidebar_bg, tickinterval=5, state='disabled', command=lambda(x): self.move(2,x))
-        self.roll = Scale(rightbar, variable=IntVar(), orient='horizontal', length=200,from_=-50, to=50, bg = sidebar_bg, tickinterval=5, state='disabled', command=lambda(x): self.move(3,x))
+        self.pitch = Scale(rightbar, variable=IntVar(), orient='vertical', length=200,from_=50, to=-50, bg = sidebar_bg, tickinterval=5, state='disabled', command=lambda(x): self.move(1,x))
+        self.roll = Scale(rightbar, variable=IntVar(), orient='horizontal', length=200,from_=-50, to=50, bg = sidebar_bg, tickinterval=5, state='disabled', command=lambda(x): self.move(2,x))
 
         self.controls = [self.throttle, self.yaw, self.pitch, self.roll]
         #placing:
@@ -108,6 +176,10 @@ class GUI(object):
         self.roll.pack()
 
 
+    def sendData(self,command):
+        sock.send(command);
+        r = Reader(sock)
+        r.start()
 
 def main():
     #host = "localhost"
