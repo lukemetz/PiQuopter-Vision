@@ -5,7 +5,7 @@
 
 #include <sstream>
 
-
+//Constructor
 Controller::Controller()
 {
 	turnProportionalGain = 1.0f; //converts offset from camera to turn duty cycle
@@ -13,39 +13,27 @@ Controller::Controller()
 	sideProportionalGain = 1.0f;
 	lowerAltitudeDutyCycle = 0.2f; //Worst case senario, slowly lower copter to the floor.
 
-  //initialize all controls to neutral
+  	//initialize all controls to neutral
 	turn(1.5);
-  side(1.5);
-  forward(1.5);
-  throttle(1);
+	side(1.5);
+	forward(1.5);
+	throttle(1);
 }
 
+//De-constructor
 Controller::~Controller()
 {
-
 }
 
 void Controller::markerBasicMovement(int markerId)
 {
     //cout<<markerId<<endl;
-    switch(markerId){
-      case 412:
-        turn(50);
-        break;
-      case 400:
-        turn(0);
-        break;
-      case 300:
-        throttle(0);
-        break;
-      default:
-        break;
-
-    }
+	if (markerId < 200 && markerId > 100) {
+		throttle((markerId-100)/100.0f+1.0f); //Convert to 0.0f-1.0f
+	}
 }
 void Controller::controlMarker(aruco::Marker &marker)
 {
-	//marker.Rxyz
 	//if (isPerpendicular(marker)) {
 	//	cout << "Is isPerpendicular Ya!!" << endl;
 	//}
@@ -56,19 +44,23 @@ void Controller::controlMarker(aruco::Marker &marker)
 	//turn(marker.Tvec.at<float>(0,0)*turnProportionalGain);
 	//side(getDelta(marker).at<float>(0,0)*sideProportionalGain);
 	//Adjust the height to ensure that the tag is in the center.
+	//throttle(marker.Tvec.at<float>(1,0)*throttleProportionalGain);
+
+	//Demo to control throttle speed by rotating code 250
 	if (marker.id == 250) {
 		cv::Mat mat = getDelta(marker);
-		//printf("%f %f %f", , mat.at<float>(1,0), mat.at<float>(2,0));
 		throttle((mat.at<float>(0,0)*-1+100)/100.0f);
 	}
 }
 
 cv::Mat Controller::getDelta(aruco::Marker &marker)
 {
+	//Convert rotations to degrees
 	float x = marker.Rvec.at<float>(0,0)/PI*180;
 	float y = marker.Rvec.at<float>(1,0)/PI*180;
 	float z = marker.Rvec.at<float>(2,0)/PI*180;
 	cv::Mat ret = cv::Mat(3,1,CV_32FC1);
+	//Adjust the values read based off of trial results.
 	//TODO remove magic calibrations
 	ret.at<float>(0,0) = x;
 	ret.at<float>(1,0) = abs(y)-130;
@@ -79,9 +71,14 @@ cv::Mat Controller::getDelta(aruco::Marker &marker)
 bool Controller::isPerpendicular(aruco::Marker &marker)
 {
 	bool ret = true;
-		float x = marker.Rvec.at<float>(0,0)/PI*180;
+	//Get the values in degrees
+	float x = marker.Rvec.at<float>(0,0)/PI*180;
 	float y = marker.Rvec.at<float>(1,0)/PI*180;
 	float z = marker.Rvec.at<float>(2,0)/PI*180;
+
+
+	//Check to see if we fall in side envelope that is perpendicular.
+	//These values where found by experimentation.
 
 	//TODO move configuration to separate script to do on the fly.
 	if (abs(x) < 20) {
@@ -106,51 +103,51 @@ bool Controller::isPerpendicular(aruco::Marker &marker)
 
 void Controller::command(char *command)
 {
-	//order Rudder elevation aileron throttle
-  //get 0 to 100 for throttle and -50 to 50 for everything else
+	//Order of servos: Rudder elevation aileron throttle
+ 	//get 0 to 100 for throttle and -50 to 50 for everything else
 	int val = atoi(&command[2]);
-  float value;
+	float value;
 	printf("val found %d \n", val);
 	switch (command[1]) {
 		case '0': //rudder - yaw (rotate), val -50 to 50
-      value = (val+50)/100.0+100;
-      if(value<1){
-          value=1;
-      }
-      else if(value>2){
-          value=2;
-      }
+			value = (val+50)/100.0+100;
+			if(value<1){
+				value=1;
+			}
+			else if(value>2){
+				value=2;
+			}
 
-      turn(value);
+			turn(value);
 			break;
 		case '1': //elevation - forward/backward, val -50 to 50
-      value = (val+50)/100.0+100;
-      if(value<1){
-          value=1;
-      }
-      else if(value>2){
-          value=2;
-      }
-      forward(value);
+			value = (val+50)/100.0+100;
+			if(value<1){
+				value=1;
+			}
+			else if(value>2){
+				value=2;
+			}
+			forward(value);
 			break;
 		case '2': //aileron - left/right turn, val -50 to 50
-      value = (val+50)/100.0+100;
-      if(value<1){
-          value=1;
-      }
-      else if(value>2){
-          value=2;
-      }
-      side(value);
+			value = (val+50)/100.0+100;
+			if(value<1){
+				value=1;
+			}
+			else if(value>2){
+				value=2;
+			}
+			side(value);
 		case '3': //throttle - up/down, val 0 to 100
-      value = val/100.0+100;
-      if(value<1){
-          value=1;
-      }
-      else if(value>2){
-          value=2;
-      }
-      throttle(value);
+			value = val/100.0+100;
+			if(value<1){
+				value=1;
+			}
+			else if(value>2){
+				value=2;
+			}
+			throttle(value);
 			break;
 		default:
 			break;
@@ -159,11 +156,7 @@ void Controller::command(char *command)
 
 void Controller::writeToServoblaster(int servo, float dutycycle)
 {
-	//ofstream servoblaster;
-	//servoblaster.open ("/dev/servoblaster");
-	//servoblaster << servo << "=" << static_cast<int>(dutycycle * 100);
-	//servoblaster << "0=120";
-	//servoblaster.close();
+	//Emulate the unix echo by calling "echo 1=120 > /dev/servoblaster"
 	std::string str;
 	std::stringstream out;
 	out << "echo ";
@@ -171,12 +164,13 @@ void Controller::writeToServoblaster(int servo, float dutycycle)
 	out << "=";
 	out << static_cast<int>(dutycycle *100);
 	out << " > /dev/servoblaster";
-
 	printf("%s\n",out.str().c_str() );
+	//Call to the system to run this command
 	system(out.str().c_str());
 
 }
 
+//TODO check these channels are correct.
 void Controller::turn(float dutycycle)
 {
 	cout << "turn" << dutycycle << endl;
