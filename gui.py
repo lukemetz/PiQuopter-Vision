@@ -1,4 +1,7 @@
 from Tkinter import *
+from PIL import Image, ImageTk
+from Reader import *
+import imghdr
 import socket
 
 #network stuff
@@ -99,22 +102,39 @@ class GUI(object):
             self.roll.set(value)
         self.move(code,str(value))
 
+    def update(self):
+        print "good"
+        if imghdr.what("current.jpg") == 'jpeg':
+            self.im = Image.open("current.jpg")
+            if (not self.im.verify()):
+                print "BAD"
+                return
+            self.tkim = ImageTk.PhotoImage(self.im)
+            #self.tkim.place(x=0, y=0, width=320, height=240);
+            self.lab = Label(self.root, image=self.tkim)
+            self.lab.image = self.im
+            self.lab.pack()
+            print "uppen the things"
+            self.lab.grid(row = 1, column = 1)
+        else:
+            print "got bad"
+
+
     def setup(self):
-        root = Tk()
+        self.root = Tk()
 
         #bindings
-        root.bind("w", self.key)
-        root.bind("a", self.key)
-        root.bind("s", self.key)
-        root.bind("d", self.key)
+        self.root.bind("w", self.key)
+        self.root.bind("a", self.key)
+        self.root.bind("s", self.key)
+        self.root.bind("d", self.key)
 
-        root.bind("<Up>", self.key)
-        root.bind("<Left>", self.key)
-        root.bind("<Right>", self.key)
-        root.bind("<Down>", self.key)
-
-        root.bind("<Escape>", self.key)
-        root.bind("<space>", self.key)
+        self.root.bind("<Up>", self.key)
+        self.root.bind("<Left>", self.key)
+        self.root.bind("<Right>", self.key)
+        self.root.bind("<Down>", self.key)
+        self.root.bind("<Escape>", self.key)
+        self.root.bind("<space>", self.key)
 
         #wigets:
         sidebar_bg = '#228800'
@@ -126,10 +146,16 @@ class GUI(object):
         self.throttle = Scale(leftbar, variable=IntVar(), orient='vertical', length=200,from_=100, to=0, bg = sidebar_bg, bd=0, tickinterval=5, state='disabled', command=lambda(x): self.move(3,x))
         self.yaw = Scale(leftbar, variable=IntVar(), orient='horizontal', length=200,from_=-50, to=50, bg = sidebar_bg, tickinterval=5, state='disabled')#,command=lambda(x): self.move(0,x))
 
-        screen = Canvas(width=320, height=240)
+        self.screen = Canvas(width=320, height=240)
             # add canvasy stuff
-
-
+        '''self.im = Image.open("current.jpg")
+        self.tkim = ImageTk.PhotoImage(self.im)
+        #self.tkim.place(x=0, y=0, width=320, height=240);
+        self.lab = Label(self.root, image=self.tkim)
+        self.lab.image = self.im
+        self.lab.pack()
+        #self.lab.place(x=0, y=0, width=320, height=240)
+        '''
         rightbar = Frame(background=sidebar_bg)
         stop = Button(rightbar, text='stop', command=lambda: self.stop())
         self.pitch = Scale(rightbar, variable=IntVar(), orient='vertical', length=200,from_=50, to=-50, bg = sidebar_bg, tickinterval=5, state='disabled')#, command=lambda(x): self.move(1,x))
@@ -145,16 +171,48 @@ class GUI(object):
         self.throttle.pack()
         self.yaw.pack()
 
-        screen.grid(row = 1, column = 1)
+
 
         rightbar.grid(row=1, column=2, sticky=N+S)
         stop.pack(fill='x')
         self.pitch.pack()
         self.roll.pack()
 
-        root.mainloop()
 
-gui = GUI()
+
+        self.gui = GUI()
+
+    def sendData(self,command):
+        sock.send(command);
+        r = Reader(sock)
+        r.start()
+
+def main():
+    #host = "localhost"
+    gui = GUI()
+    port = int(textport)
+    addr = (host, port)
+    buf = 1024
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+    sock.connect(addr)
+    #sock.send("C1200");
+    r = Reader(sock, gui)
+    print "are u sure?"
+    r.start()
+    print "did u block?"
+    gui.root.mainloop()
+
+    #write as well as read from socket.
+
+    #while(1):
+    #    k = raw_input()
+    #    sock.send(k)
+
+    sys.exit()
+
+if (__name__ == "__main__"):
+  main()
 
 
 
