@@ -18,11 +18,6 @@ class GUI(object):
         self.command = 'stop'
         self.setup()
 
-    def move(self, code, value):
-        self.command = 'C'+str(code)+value
-        self.sendData(self.command); 
-        print self.command
-
     def start(self):
         if  self.throttle.get()==0:
             self.active = True
@@ -34,15 +29,27 @@ class GUI(object):
     def stop(self):
         self.active = False
         print 'stopped'
-        self.move(0,'0')
-        self.move(1,'0')
-        self.move(2,'0')
-        self.move(3,'0')
-        self.throttle.set(0)
-        self.yaw.set(0)
-        self.pitch.set(0)
-        self.roll.set(0)
-        self.command='stop'
+
+        for i in range(4):
+            self.move(i,'0')
+        for c in self.controls:
+            c.set(0)
+        self.command='C300'
+        self.sendData()
+
+    def move(self, code, value):
+        if value[0]=='-':
+            full = value[0]+'0'*(4-len(value))+value[1:]
+        else:
+            full = '0'*(4-len(value))+value
+        self.command = 'C'+str(code)+full
+        self.sendData()
+        print self.command
+
+    def sendData(self):
+        if self.active:
+            print self.command
+            sock.send(self.command)
 
     def key(self,event):
         key = event.keysym
@@ -51,14 +58,13 @@ class GUI(object):
             return
 
         elif key == 'space':
-            self.move(0,'0')
-            self.move(1,'0')
-            self.move(2,'0')
-            self.yaw.set(0)
-            self.pitch.set(0)
-            self.roll.set(0)
-            
+            # send all but throttle to 0
+            for i in range(3):
+                self.move(i,'0')
+            for c in self.controls[:-1]:
+                c.set(0)
             return
+        
         elif key == 'w':
             code = 3
             value = self.throttle.get()+1
@@ -118,7 +124,7 @@ class GUI(object):
         leftbar = Frame(bg = sidebar_bg, bd=0)
         start = Button(leftbar, text = 'start', command=lambda: self.start())
         self.throttle = Scale(leftbar, variable=IntVar(), orient='vertical', length=200,from_=100, to=0, bg = sidebar_bg, bd=0, tickinterval=5, state='disabled', command=lambda(x): self.move(3,x))
-        self.yaw = Scale(leftbar, variable=IntVar(), orient='horizontal', length=200,from_=-50, to=50, bg = sidebar_bg, tickinterval=5, state='disabled',command=lambda(x): self.move(0,x))
+        self.yaw = Scale(leftbar, variable=IntVar(), orient='horizontal', length=200,from_=-50, to=50, bg = sidebar_bg, tickinterval=5, state='disabled')#,command=lambda(x): self.move(0,x))
 
         screen = Canvas(width=320, height=240)
             # add canvasy stuff
@@ -126,16 +132,17 @@ class GUI(object):
 
         rightbar = Frame(background=sidebar_bg)
         stop = Button(rightbar, text='stop', command=lambda: self.stop())
-        self.pitch = Scale(rightbar, variable=IntVar(), orient='vertical', length=200,from_=50, to=-50, bg = sidebar_bg, tickinterval=5, state='disabled', command=lambda(x): self.move(1,x))
-        self.roll = Scale(rightbar, variable=IntVar(), orient='horizontal', length=200,from_=-50, to=50, bg = sidebar_bg, tickinterval=5, state='disabled', command=lambda(x): self.move(2,x))
+        self.pitch = Scale(rightbar, variable=IntVar(), orient='vertical', length=200,from_=50, to=-50, bg = sidebar_bg, tickinterval=5, state='disabled')#, command=lambda(x): self.move(1,x))
+        self.roll = Scale(rightbar, variable=IntVar(), orient='horizontal', length=200,from_=-50, to=50, bg = sidebar_bg, tickinterval=5, state='disabled')#, command=lambda(x): self.move(2,x))
 
-        self.controls = [self.throttle, self.yaw, self.pitch, self.roll]
+        self.controls = [self.yaw, self.pitch, self.roll,self.throttle]
+        
         #placing:
         title.grid(row=0, column=0, columnspan=3, sticky=E+W)
 
         leftbar.grid(row=1, column=0, sticky=N+S)
         start.pack(fill='both')
-        self.throttle.pack(fill='x')
+        self.throttle.pack()
         self.yaw.pack()
 
         screen.grid(row = 1, column = 1)
@@ -146,11 +153,6 @@ class GUI(object):
         self.roll.pack()
 
         root.mainloop()
-
-    def sendData(self,command):
-        sock.send(command);
-        r = Reader(sock)
-        r.start()
 
 gui = GUI()
 
