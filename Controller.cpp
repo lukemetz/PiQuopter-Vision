@@ -120,25 +120,25 @@ void Controller::command(char *command)
 
 			turn(value);
 			break;
-		case '1': //elevation - forward/backward, val -50 to 50
-			value = (val+50)/100.0+100;
-			if(value<1){
-				value=1;
-			}
-			else if(value>2){
-				value=2;
-			}
-			forward(value);
+		case '1': //elevation - (pitch) forward/backward, val -50 to 50
+      value = (val+50)/100.0+100;
+      if(value<1){
+          value=1;
+      }
+      else if(value>2){
+          value=2;
+      }
+      forward(value);
 			break;
-		case '2': //aileron - left/right turn, val -50 to 50
-			value = (val+50)/100.0+100;
-			if(value<1){
-				value=1;
-			}
-			else if(value>2){
-				value=2;
-			}
-			side(value);
+		case '2': //aileron - (roll) left/right turn, val -50 to 50
+      value = (val+50)/100.0+100;
+      if(value<1){
+          value=1;
+      }
+      else if(value>2){
+          value=2;
+      }
+      side(value);
 		case '3': //throttle - up/down, val 0 to 100
 			value = val/100.0+100;
 			if(value<1){
