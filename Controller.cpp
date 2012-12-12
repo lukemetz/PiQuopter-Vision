@@ -5,6 +5,26 @@
 
 #include <sstream>
 
+
+
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <algorithm>
+#include <cstdlib>
+#include <deque>
+#include <iostream>
+#include <list>
+#include <set>
+
+//Aruco libraries
+#include <aruco/aruco.h>
+#include <aruco/cvdrawingutils.h>
+
+using namespace cv;
+using namespace aruco;
+
+
 //Constructor
 Controller::Controller()
 {
@@ -18,6 +38,8 @@ Controller::Controller()
 	side(1.5);
 	forward(1.5);
 	throttle(1);
+	isStarted = 0;
+	time_lift = 0;
 }
 
 //De-constructor
@@ -28,9 +50,9 @@ Controller::~Controller()
 void Controller::markerBasicMovement(int markerId)
 {
     //cout<<markerId<<endl;
-	if (markerId < 200 && markerId > 100) {
-		throttle((markerId-100)/100.0f+1.0f); //Convert to 0.0f-1.0f
-	}
+	// if (markerId < 200 && markerId > 100) {
+	// 	throttle((markerId-100)/100.0f+1.0f); //Convert to 0.0f-1.0f
+	// }
 }
 void Controller::controlMarker(aruco::Marker &marker)
 {
@@ -47,9 +69,40 @@ void Controller::controlMarker(aruco::Marker &marker)
 	//throttle(marker.Tvec.at<float>(1,0)*throttleProportionalGain);
 
 	//Demo to control throttle speed by rotating code 250
-	if (marker.id == 250) {
-		cv::Mat mat = getDelta(marker);
-		throttle((mat.at<float>(0,0)*-1+100)/100.0f);
+	// if (marker.id == 250) {
+	// 	cv::Mat mat = getDelta(marker);
+	// 	throttle((mat.at<float>(0,0)*-1+100)/100.0f);
+	// }
+
+
+
+
+	if (marker.id == 314) {
+		isStarted = true;
+		//turn(marker.Tvec.at<float>(0,0)*turnProportionalGain);
+		//side(getDelta(marker).at<float>(0,0)*sideProportionalGain);
+		//throttle(marker.Tvec.at<float>(1,0)*throttleProportionalGain);
+	}
+}
+
+void Controller::step(float dt)
+{
+	float max_total_time = 10;
+	if (isStarted == true) {
+			time_accum += dt;
+			printf("timeAccum %f\n", time_accum);
+			if (time_accum > max_total_time) {
+				isStarted = false;
+				time_accum = 0;
+				throttle(1);
+			}
+
+			float maxVal = 0.1;
+			if (time_accum < max_total_time/2) {
+				throttle(1+maxVal*(time_accum)/(max_total_time/2));
+			} else {
+				throttle(1+maxVal-maxVal*(time_accum-max_total_time/2)/(max_total_time/2));
+			}
 	}
 }
 
@@ -174,23 +227,39 @@ void Controller::writeToServoblaster(int servo, float dutycycle)
 void Controller::turn(float dutycycle)
 {
 	cout << "turn" << dutycycle << endl;
+	if (dutycycle < 1 || dutycycle > 2) {
+		printf("Error, turn %f\n", dutycycle);
+		return;
+	}
 	writeToServoblaster(0, dutycycle);
 }
 
 void Controller::throttle(float dutycycle)
 {
 	cout << "elevation" << dutycycle << endl;
+	if (dutycycle < 1 || dutycycle > 2) {
+		printf("Error, throttle %f\n", dutycycle);
+		return;
+	}
 	writeToServoblaster(3, dutycycle);
 }
 
 void Controller::forward(float dutycycle)
 {
 	cout << "forward" << dutycycle << endl;
+	if (dutycycle < 1 || dutycycle > 2) {
+		printf("Error, forward %f\n", dutycycle);
+		return;
+	}
 	writeToServoblaster(2, dutycycle);
 }
 
 void Controller::side(float dutycycle)
 {
 	cout << "side" << dutycycle << endl;
+	if (dutycycle < 1 || dutycycle > 2) {
+		printf("Error, side %f\n", dutycycle);
+		return;
+	}
 	writeToServoblaster(1, dutycycle);
 }

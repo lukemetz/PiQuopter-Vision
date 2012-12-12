@@ -29,6 +29,11 @@ public:
 	float throttleProportionalGain;
 	float sideProportionalGain;
 
+	bool isStarted;
+	float time_lift;
+
+
+	float time_accum;
 	//Other constants
 	float lowerAltitudeDutyCycle; //Constant used to slowly lower copter to the ground.
 
@@ -52,6 +57,7 @@ public:
 	//Get the delta from perpendicular.
 	cv::Mat getDelta(aruco::Marker &marker);
 
+	void step(float dt);
 
 private:
 	//Output to servo blaster to control the motors/

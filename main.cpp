@@ -217,10 +217,14 @@ int main(int argc,char **argv)
         }
         char key=0; //Current keypress in this char
         int index=0;
+        double start_tick;
 
         //capture until press ESC or until the end of the video
         while ( key!=27 && TheVideoCapturer.grab())
         {
+            float dt = ((double)getTickCount()-start_tick)/getTickFrequency();
+            start_tick = (double)getTickCount();
+            controller->step(dt);
             //Grab a frame
             TheVideoCapturer.retrieve( TheInputImage);
 
@@ -247,7 +251,7 @@ int main(int argc,char **argv)
             AvrgTime.first+=((double)getTickCount()-tick)/getTickFrequency();
             AvrgTime.second++;
             //Print time between frames
-            cout<<"Time detection="<<1000*AvrgTime.first/AvrgTime.second<<" milliseconds"<<endl;
+            //cout<<"Time detection="<<1000*AvrgTime.first/AvrgTime.second<<" milliseconds"<<endl;
             //Copy the image
             TheInputImage.copyTo(TheInputImageCopy);
 
@@ -268,6 +272,7 @@ int main(int argc,char **argv)
             for (unsigned int i=0;i<TheMarkers.size();i++) {
                 controller->markerBasicMovement(TheMarkers[i].id);
                 controller->controlMarker(TheMarkers[i]);
+                break; //Only do the first one for now
             }
 
             if (gui) {
