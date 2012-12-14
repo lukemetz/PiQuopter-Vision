@@ -87,7 +87,7 @@ void Controller::controlMarker(aruco::Marker &marker)
 
 void Controller::step(float dt)
 {
-	float max_total_time = 10;
+	float max_total_time = 8;
 	if (isStarted == true) {
 			time_accum += dt;
 			printf("timeAccum %f\n", time_accum);
