@@ -101,7 +101,11 @@ void Controller::step(float dt)
 			if (time_accum < max_total_time/2) {
 				throttle(1+maxVal*(time_accum)/(max_total_time/2));
 			} else {
-				throttle(1+maxVal-maxVal*(time_accum-max_total_time/2)/(max_total_time/2));
+				if ( 0.75f < time_accum*3/max_total_time) {
+					throttle(1.4f);
+				} else {
+					throttle(1.0f);
+				}
 			}
 	}
 }
