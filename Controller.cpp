@@ -35,9 +35,9 @@ Controller::Controller()
 
   	//initialize all controls to neutral
 	turn(1.5);
-	side(1.5);
-	forward(1.5);
-	throttle(1);
+	forward(1.48);
+	side(1.49);
+	throttle(1.09);
 	isStarted = 0;
 	time_lift = 0;
 }
@@ -251,7 +251,7 @@ void Controller::forward(float dutycycle)
 		printf("Error, forward %f\n", dutycycle);
 		return;
 	}
-	writeToServoblaster(2, dutycycle);
+	writeToServoblaster(1, dutycycle);
 }
 
 void Controller::side(float dutycycle)
@@ -261,5 +261,5 @@ void Controller::side(float dutycycle)
 		printf("Error, side %f\n", dutycycle);
 		return;
 	}
-	writeToServoblaster(1, dutycycle);
+	writeToServoblaster(2, dutycycle);
 }
