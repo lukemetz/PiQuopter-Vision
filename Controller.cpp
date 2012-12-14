@@ -26,21 +26,7 @@ using namespace aruco;
 
 
 //Constructor
-Controller::Controller()
-{
-	turnProportionalGain = 1.0f; //converts offset from camera to turn duty cycle
-	throttleProportionalGain = -1.0f; // converts offset in the y direction to throttle
-	sideProportionalGain = 1.0f;
-	lowerAltitudeDutyCycle = 0.2f; //Worst case senario, slowly lower copter to the floor.
 
-  	//initialize all controls to neutral
-	turn(1.5);
-	forward(1.48);
-	side(1.49);
-	throttle(1.09);
-	isStarted = 0;
-	time_lift = 0;
-}
 
 //De-constructor
 Controller::~Controller()
@@ -56,6 +42,7 @@ void Controller::markerBasicMovement(int markerId)
 }
 void Controller::controlMarker(aruco::Marker &marker)
 {
+	found_marker = true;
 	//if (isPerpendicular(marker)) {
 	//	cout << "Is isPerpendicular Ya!!" << endl;
 	//}
@@ -74,12 +61,23 @@ void Controller::controlMarker(aruco::Marker &marker)
 	// 	throttle((mat.at<float>(0,0)*-1+100)/100.0f);
 	// }
 
+	// if (marker.id == 314) {
+	// 	cv::Mat deltas = getDelta(marker);
+	// 	cout << "deltas: " << deltas << endl;
+	// 	float throttle_val = marker.Tvec.at<float>(1,0)*throttleProportionalGain;
 
+	// 	if (throttle_val > .1) {
+	// 		throttle_val = .1;
+	// 	} else if (throttle_val < -.1) {
+	// 		throttle_val = -.1;
+	// 	}
 
+	// 	throttle(throttle_val + hover_throttle);
+	// }
 
 	if (marker.id == 314) {
 		isStarted = true;
-		//turn(marker.Tvec.at<float>(0,0)*turnProportionalGain);
+		//turn(marker.Tvec.at<float>(0,0)*turnProportionalGain);found_marker
 		//side(getDelta(marker).at<float>(0,0)*sideProportionalGain);
 		//throttle(marker.Tvec.at<float>(1,0)*throttleProportionalGain);
 	}
@@ -89,25 +87,25 @@ void Controller::step(float dt)
 {
 	float max_total_time = 8;
 	if (isStarted == true) {
-			time_accum += dt;
-			printf("timeAccum %f\n", time_accum);
-			if (time_accum > max_total_time) {
-				isStarted = false;
-				time_accum = 0;
-				throttle(1);
-			}
+		time_accum += dt;
+		printf("timeAccum %f\n", time_accum);
+		if (time_accum > max_total_time) {
+			isStarted = false;
+			time_accum = 0;
+			throttle(1);
+		}
 
-			float maxVal = 0.1;
-			if (time_accum < max_total_time/2) {
-				throttle(1+maxVal*(time_accum)/(max_total_time/2));
-			} else {
-				if ( 0.75f < time_accum*3/max_total_time) {
-					throttle(1.4f);
-				} else {
-					throttle(1.0f);
-				}
-			}
+		float maxVal = 0.55;
+		if (time_accum < max_total_time/2) {
+			throttle(1+maxVal*(time_accum)/(max_total_time/2));
+		} else {
+			throttle(1.0f);
+		}
 	}
+	if (found_marker == false && isStarted == false) {
+		throttle(lower_altitude);
+	}
+	found_marker = false;
 }
 
 cv::Mat Controller::getDelta(aruco::Marker &marker)

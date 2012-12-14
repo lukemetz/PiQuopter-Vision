@@ -28,14 +28,17 @@ public:
 	float turnProportionalGain;
 	float throttleProportionalGain;
 	float sideProportionalGain;
+	float hover_throttle;
 
 	bool isStarted;
+	bool found_marker;
+
 	float time_lift;
 
 
 	float time_accum;
 	//Other constants
-	float lowerAltitudeDutyCycle; //Constant used to slowly lower copter to the ground.
+	float lower_altitude; //Constant used to slowly lower copter to the ground.
 
 	Controller();
 	~Controller();
